@@ -12,6 +12,9 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.widget.CheckBox;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -158,6 +161,16 @@ public class MainActivity extends Activity {
             card.addView(U.text(this, sb.toString()));
         }
 
+        CheckBox close = new CheckBox(this);
+        close.setText("斷開藍牙時：暫停音樂並回到桌面");
+        close.setTextSize(15);
+        close.setChecked(r.closeOnDisconnect);
+        close.setOnCheckedChangeListener((b, on) -> {
+            r.closeOnDisconnect = on;
+            Store.save(this, r);
+        });
+        card.addView(close);
+
         LinearLayout btns = U.row(this);
         btns.addView(U.smallButton(this, "選擇 App", v -> openPicker(r.address)));
         btns.addView(U.smallButton(this, "測試", v -> {
@@ -168,7 +181,14 @@ public class MainActivity extends Activity {
             toast("開始依序開啟…");
             AppLauncher.run(this, r.apps, null);
         }));
-        btns.addView(U.smallButton(this, "刪除", v -> new AlertDialog.Builder(this)
+        btns.addView(U.smallButton(this, "測試斷開", v -> {
+            toast("3 秒後暫停音樂並回到桌面");
+            new Handler(Looper.getMainLooper()).postDelayed(() -> AppLauncher.closeAll(this), 3000);
+        }));
+        card.addView(btns);
+
+        LinearLayout btns2 = U.row(this);
+        btns2.addView(U.smallButton(this, "刪除", v -> new AlertDialog.Builder(this)
                 .setMessage("刪除「" + r.name + "」的設定？")
                 .setPositiveButton("刪除", (d, w) -> {
                     Store.delete(this, r.address);
@@ -176,7 +196,7 @@ public class MainActivity extends Activity {
                 })
                 .setNegativeButton("取消", null)
                 .show()));
-        card.addView(btns);
+        card.addView(btns2);
         return card;
     }
 

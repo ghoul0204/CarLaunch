@@ -2,6 +2,8 @@ package com.ghoul.carlaunch;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
+import android.view.KeyEvent;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -28,6 +30,26 @@ public class AppLauncher {
         }
         if (done != null) {
             h.postDelayed(done, first + Math.max(0, list.size() - 1) * gap + 500);
+        }
+    }
+
+    /** 斷線動作：暫停正在播放的音樂 / Podcast，然後回到桌面 */
+    public static void closeAll(Context ctx) {
+        Context c = ctx.getApplicationContext();
+        try {
+            AudioManager am = (AudioManager) c.getSystemService(Context.AUDIO_SERVICE);
+            if (am != null) {
+                am.dispatchMediaKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE));
+                am.dispatchMediaKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PAUSE));
+            }
+        } catch (Exception ignored) {
+        }
+        try {
+            Intent home = new Intent(Intent.ACTION_MAIN);
+            home.addCategory(Intent.CATEGORY_HOME);
+            home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            c.startActivity(home);
+        } catch (Exception ignored) {
         }
     }
 

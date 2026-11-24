@@ -21,6 +21,8 @@ public class Store {
         public String address = "";
         public String name = "";
         public boolean enabled = true;
+        /** 斷線時暫停音樂並回到桌面 */
+        public boolean closeOnDisconnect = true;
         public List<String> apps = new ArrayList<>();
     }
 
@@ -37,6 +39,7 @@ public class Store {
             r.address = address;
             r.name = o.optString("name", address);
             r.enabled = o.optBoolean("enabled", true);
+            r.closeOnDisconnect = o.optBoolean("closeOnDisconnect", true);
             JSONArray a = o.optJSONArray("apps");
             if (a != null) {
                 for (int i = 0; i < a.length(); i++) r.apps.add(a.getString(i));
@@ -70,6 +73,7 @@ public class Store {
             JSONObject o = new JSONObject();
             o.put("name", r.name);
             o.put("enabled", r.enabled);
+            o.put("closeOnDisconnect", r.closeOnDisconnect);
             JSONArray a = new JSONArray();
             for (String p : r.apps) a.put(p);
             o.put("apps", a);
@@ -97,6 +101,15 @@ public class Store {
 
     public static void setLastRun(Context c, String address, long t) {
         sp(c).edit().putLong("last:" + address, t).commit();
+    }
+
+    /** 最後一次連上的時間（用來判斷斷線後是不是馬上又連回來） */
+    public static long lastConnect(Context c, String address) {
+        return sp(c).getLong("conn:" + address, 0);
+    }
+
+    public static void setLastConnect(Context c, String address, long t) {
+        sp(c).edit().putLong("conn:" + address, t).commit();
     }
 
     // ---- 簡單紀錄，方便查「為什麼沒開」 ----
