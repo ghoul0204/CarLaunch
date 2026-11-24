@@ -84,6 +84,13 @@ public class MainActivity extends Activity {
             root.addView(U.button(this, "去開啟", v -> startActivity(new Intent(
                     Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())))));
         }
+        boolean acc = ClearService.isEnabled(this);
+        root.addView(U.text(this, (acc ? "✅ " : "⬜ ") + "無障礙服務（選用：斷線時自動按「全部清除」）"));
+        if (!acc) {
+            root.addView(U.small(this, "Android 13 以後：先按「開啟本 App 的系統設定」→ 右上角 ⋮ →「允許受限制的設定」，再回來按下面按鈕，找到「車藍牙自動開：清除最近使用」打開。"));
+            root.addView(U.button(this, "開啟無障礙設定", v -> startActivity(new Intent(
+                    Settings.ACTION_ACCESSIBILITY_SETTINGS))));
+        }
         root.addView(U.small(this, "小米 / OPPO / vivo / 華為等手機，另外要在 App 資訊裡開「自啟動」、「背景彈出視窗」，電池設為「無限制」。"));
         root.addView(U.button(this, "開啟本 App 的系統設定", v -> startActivity(new Intent(
                 Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName())))));
@@ -171,6 +178,19 @@ public class MainActivity extends Activity {
         });
         card.addView(close);
 
+        CheckBox clear = new CheckBox(this);
+        clear.setText("斷開藍牙時：也自動按「全部清除」（需開無障礙服務）");
+        clear.setTextSize(15);
+        clear.setChecked(r.clearRecents);
+        clear.setOnCheckedChangeListener((b, on) -> {
+            r.clearRecents = on;
+            Store.save(this, r);
+            if (on && !ClearService.isEnabled(this)) {
+                toast("請到上方「① 必要權限」開啟無障礙服務");
+            }
+        });
+        card.addView(clear);
+
         LinearLayout btns = U.row(this);
         btns.addView(U.smallButton(this, "選擇 App", v -> openPicker(r.address)));
         btns.addView(U.smallButton(this, "測試", v -> {
@@ -182,8 +202,12 @@ public class MainActivity extends Activity {
             AppLauncher.run(this, r.apps, null);
         }));
         btns.addView(U.smallButton(this, "測試斷開", v -> {
-            toast("3 秒後暫停音樂並回到桌面");
-            new Handler(Looper.getMainLooper()).postDelayed(() -> AppLauncher.closeAll(this), 3000);
+            toast(r.clearRecents ? "3 秒後暫停音樂、回到桌面並全部清除" : "3 秒後暫停音樂並回到桌面");
+            Handler hd = new Handler(Looper.getMainLooper());
+            hd.postDelayed(() -> AppLauncher.closeAll(this), 3000);
+            if (r.clearRecents) {
+                hd.postDelayed(() -> ClearService.request(this), 4000);
+            }
         }));
         card.addView(btns);
 

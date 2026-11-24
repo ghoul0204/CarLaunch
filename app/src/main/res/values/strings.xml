@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="acc_label">車藍牙自動開：清除最近使用</string>
+    <string name="acc_desc">斷開車子藍牙後，自動打開「最近使用的應用程式」並按下「全部清除」。只會在斷線（或按測試）時動作，不會讀取或傳送任何資料。</string>
+</resources>

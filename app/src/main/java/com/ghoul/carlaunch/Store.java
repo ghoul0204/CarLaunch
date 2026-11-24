@@ -23,6 +23,8 @@ public class Store {
         public boolean enabled = true;
         /** 斷線時暫停音樂並回到桌面 */
         public boolean closeOnDisconnect = true;
+        /** 斷線時用無障礙服務按「全部清除」 */
+        public boolean clearRecents = false;
         public List<String> apps = new ArrayList<>();
     }
 
@@ -40,6 +42,7 @@ public class Store {
             r.name = o.optString("name", address);
             r.enabled = o.optBoolean("enabled", true);
             r.closeOnDisconnect = o.optBoolean("closeOnDisconnect", true);
+            r.clearRecents = o.optBoolean("clearRecents", false);
             JSONArray a = o.optJSONArray("apps");
             if (a != null) {
                 for (int i = 0; i < a.length(); i++) r.apps.add(a.getString(i));
@@ -74,6 +77,7 @@ public class Store {
             o.put("name", r.name);
             o.put("enabled", r.enabled);
             o.put("closeOnDisconnect", r.closeOnDisconnect);
+            o.put("clearRecents", r.clearRecents);
             JSONArray a = new JSONArray();
             for (String p : r.apps) a.put(p);
             o.put("apps", a);

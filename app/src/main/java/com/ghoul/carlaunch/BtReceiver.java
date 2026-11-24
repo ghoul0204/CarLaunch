@@ -76,6 +76,7 @@ public class BtReceiver extends BroadcastReceiver {
         final Context app = context.getApplicationContext();
         final String addr = r.address;
         final String name = r.name;
+        final boolean clear = r.clearRecents;
         Store.log(app, "斷開 " + name + "，15 秒後確認");
 
         final PendingResult pr = goAsync();
@@ -88,6 +89,7 @@ public class BtReceiver extends BroadcastReceiver {
                     // 真的下車了：下次連上就重新開 App
                     Store.setLastRun(app, addr, 0);
                     Store.log(app, "已斷開 " + name + " → 暫停音樂、回到桌面");
+                    if (clear) ClearService.request(app);
                 }
             } finally {
                 pr.finish();
